@@ -41,10 +41,14 @@ class ImageFileService extends FileService {
     var uri = Uri.parse(url);
     if (mode == ImageAcceleration.ech &&
         BangumiImageUrlRewriter.isBangumiImage(uri)) {
-      return _echService.get(
-        uri.replace(scheme: 'https').toString(),
-        headers: headers,
-      );
+      try {
+        return await _echService.get(
+          uri.replace(scheme: 'https').toString(),
+          headers: headers,
+        );
+      } catch (_) {
+        // Fall back to standard HTTP request if ECH fails
+      }
     }
     if (mode == ImageAcceleration.mirror) {
       uri = BangumiImageUrlRewriter.rewrite(uri);
