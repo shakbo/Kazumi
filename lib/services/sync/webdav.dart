@@ -9,6 +9,7 @@ import 'package:kazumi/modules/collect/collect_module.dart';
 import 'package:kazumi/modules/collect/collect_change_module.dart';
 import 'package:kazumi/services/sync/history_sync_service.dart';
 import 'package:kazumi/services/sync/webdav_remote_file_commit.dart';
+import 'package:kazumi/services/sync/kazumi_webdav_client.dart';
 import 'package:kazumi/utils/async_serial_queue.dart';
 import 'package:kazumi/utils/async_single_flight.dart';
 
@@ -46,13 +47,15 @@ class WebDav {
     initialized = false;
     var directory = await getApplicationSupportDirectory();
     webDavLocalTempDirectory = Directory('${directory.path}/webdavTemp');
-    webDavURL = GStorage.getSetting(SettingsKeys.webDavURL);
-    webDavUsername = GStorage.getSetting(SettingsKeys.webDavUsername);
-    webDavPassword = GStorage.getSetting(SettingsKeys.webDavPassword);
+    webDavURL = GStorage.getSetting(SettingsKeys.webDavURL).toString().trim();
+    webDavUsername =
+        GStorage.getSetting(SettingsKeys.webDavUsername).toString().trim();
+    webDavPassword =
+        GStorage.getSetting(SettingsKeys.webDavPassword).toString();
     if (webDavURL.isEmpty) {
       throw Exception('请先填写WebDAV URL');
     }
-    client = webdav.newClient(
+    client = newKazumiWebDavClient(
       webDavURL,
       user: webDavUsername,
       password: webDavPassword,
