@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -40,7 +39,7 @@ class KazumiWebDavClient extends webdav.Client {
     final status = resp.statusCode ?? 0;
     // Accept 200 OK, 204 No Content, or any 2xx response.
     if (status < 200 || status >= 300) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
   }
 
@@ -52,7 +51,7 @@ class KazumiWebDavClient extends webdav.Client {
     // 201 Created: newly created
     // 405 Method Not Allowed / 200 OK: already exists
     if (status != 201 && status != 405 && status != 200) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
   }
 
@@ -72,7 +71,7 @@ class KazumiWebDavClient extends webdav.Client {
     );
     final status = resp.statusCode ?? 0;
     if (status < 200 || status >= 300) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
     final file = File(savePath);
     await file.parent.create(recursive: true);
@@ -116,7 +115,7 @@ class KazumiWebDavClient extends webdav.Client {
     );
     final status = resp.statusCode ?? 0;
     if (status != 200 && status != 201 && status != 204) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
   }
 
@@ -136,7 +135,7 @@ class KazumiWebDavClient extends webdav.Client {
     );
     final status = resp.statusCode ?? 0;
     if (status < 200 || status >= 300) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
     return resp.data ?? <int>[];
   }
@@ -162,7 +161,7 @@ class KazumiWebDavClient extends webdav.Client {
     );
     final status = resp.statusCode ?? 0;
     if (status != 200 && status != 201 && status != 204) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
   }
 
@@ -179,7 +178,7 @@ class KazumiWebDavClient extends webdav.Client {
     );
     final status = resp.statusCode ?? 0;
     if (status != 207) {
-      throw webdav.newResponseError(resp);
+      throw _newResponseError(resp);
     }
     return parsePropfindResponse(cleanPath, resp.data.toString());
   }
@@ -311,4 +310,13 @@ String _fixSlashes(String s) {
     s = '/$s';
   }
   return _fixSlash(s);
+}
+
+DioException _newResponseError(Response resp) {
+  return DioException(
+    requestOptions: resp.requestOptions,
+    response: resp,
+    type: DioExceptionType.badResponse,
+    error: resp.statusMessage,
+  );
 }
